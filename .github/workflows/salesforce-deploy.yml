@@ -1,0 +1,88 @@
+name: Salesforce CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+          sf version
+
+      - name: Authenticate to Salesforce
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url --sfdx-url-file ./SFDX_AUTH_URL.txt --alias target-org --set-default
+          rm ./SFDX_AUTH_URL.txt
+
+      - name: Run Apex Tests
+        run: sf apex run test --test-level RunLocalTests --code-coverage --result-format human --wait 20
+
+      - name: Validate Deployment
+        run: sf project deploy validate --source-dir force-app --test-level RunLocalTests --wait 20
+
+  deploy:
+    name: Deploy to Salesforce
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+          sf version
+
+      - name: Authenticate to Salesforce
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url --sfdx-url-file ./SFDX_AUTH_URL.txt --alias target-org --set-default
+          rm ./SFDX_AUTH_URL.txt
+
+      - name: Deploy to Salesforce
+        run: sf project deploy start --source-dir force-app --test-level RunLocalTests --wait 20
+
+      - name: Deployment Status
+        if: always()
+        run: echo "Deployment completed with status ${{ job.status }}"
+
+  quick-deploy:
+    name: Quick Deploy (Manual)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+          sf version
+
+      - name: Authenticate to Salesforce
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url --sfdx-url-file ./SFDX_AUTH_URL.txt --alias target-org --set-default
+          rm ./SFDX_AUTH_URL.txt
+
+      - name: Quick Deploy
+        run: sf project deploy start --source-dir force-app --wait 20

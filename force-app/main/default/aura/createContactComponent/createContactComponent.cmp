@@ -1,0 +1,65 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" controller="CreateContact" >
+	<aura:attribute name ="contactObj" type="Contact" default="{'sobjectType':'Contact',
+                                                               'FirstName':'',
+                                                               'Lastname':'',
+                                                               'Phone':''}"/>
+
+
+    <aura:attribute name="contactId" type="String"/>
+    
+    
+    <article class="slds-card">
+<div class="slds-card__header slds-grid">
+<header class="slds-media slds-media_center slds-has-flexi-truncate">
+<div class="slds-media__figure">
+<span class="slds-icon_container slds-icon-standard-account" title="account">
+<lightning:icon iconName="standard:Account" alternativeText="alternativeText" />
+<span class="slds-assistive-text">account</span>
+</span>
+</div>
+<div class="slds-media__body">
+<h2 class="slds-card__header-title">
+<a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+<span>Contacts</span>
+
+</a>
+</h2>
+</div>
+<div class="slds-no-flex">
+<button class="slds-button slds-button_neutral">New</button>
+</div>
+</header>
+</div>
+<div class="slds-card__body slds-card__body_inner">
+    <h1> Welcome to Salesforce Technology </h1>
+    <lightning:layout>
+    <lightning:layoutitem>
+        <lightning:input  label="FirstName" aura:id="fNumber"  value="{!v.contactObj.FirstName}"/>
+        
+          <!-- Brand variant: Identifies the primary action in a group of buttons -->
+    <lightning:button variant="brand" label="Save"  onclick="{! c.handleClick }" />
+    
+    </lightning:layoutitem> 
+    </lightning:layout>
+
+</div>
+<footer class="slds-card__footer">
+<div class="slds-notify_container">
+  <div class="slds-notify slds-notify--toast" role="Status">
+    <span class="slds-assistive-text">Info</span>
+    <button class="slds-button slds-notify__close slds-button--icon-inverse" title="Close">
+      
+      <span class="slds-assistive-text">Close</span>
+    </button>
+    <div class="slds-notify__content">
+      <h2 class="slds-text-heading--small">Base Toast</h2>
+    </div>
+  </div>
+</div>
+</footer>
+</article> 
+    
+    
+    
+
+</aura:component>

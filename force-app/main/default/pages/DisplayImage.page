@@ -1,0 +1,13 @@
+<apex:page showHeader="false">
+    <apex:pageBlock >
+        <apex:pageBlockSection >
+    <table>
+    <tr>     
+    <td width="1000px" height="600px" align="center">
+        <apex:image url="https://developer.salesforce.com/files/salesforce-developer-network-logo.png" />
+    </td>
+    </tr>
+        </table>
+            </apex:pageBlockSection>
+            </apex:pageBlock>
+    </apex:page>

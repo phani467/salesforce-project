@@ -1,0 +1,35 @@
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" >
+    <aura:attribute name="buttonLabel" type="String" default="Search"/>
+    <aura:attribute name="newLabel" type="String" default="New Cars"/>
+    
+    <aura:attribute name="isnewAvailable" type="Boolean"/>
+    <aura:attribute name="carTypes" type="String[]" default="Sports , Luxury, van, Truck, Bolt Bus" description="Use to store list of car types avialable to select"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <lightning:layout horizontalAlign="center">
+        <lightning:layoutItem    padding="around-medium">
+            <lightning:select    name="selectItem" aura:id="carTypeList" value="label-hidden" validity="" onchange="{!c.newvalueSelected}" >
+                <option  value=""    text="All Types" />
+                <aura:iteration var="item" items="{!v.carTypes}">
+                    <option value="" text="{!item}" />
+                </aura:iteration>               
+                
+            </lightning:select>
+        </lightning:layoutItem>
+        <lightning:layoutItem padding="around-medium">
+            <!-- Display button based on availablility -->
+            <lightning:button label="{!v.buttonLabel}" variant="brand" onclick="{!c.seachClicked}"/>
+            <lightning:button label="togglebutton" variant="newutral" onclick="{!c.toggleButton}"/>
+            <aura:if isTrue="{!v.isnewAvailable}">
+                <lightning:button label="{!v.newLabel}" variant="neutral" />
+                <aura:set attribute="else">
+                    New Prodocuts not available this time
+                </aura:set>                              
+            </aura:if>
+            <div>
+                <!-- Iteratin through items -->                
+            </div>            
+            
+        </lightning:layoutItem>        
+        
+    </lightning:layout>
+</aura:component>

@@ -1,0 +1,19 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" controller="Calculator" >
+<aura:attribute name="fnumber" type="decimal"/>
+<aura:attribute name="snumber" type="decimal"/>
+<aura:attribute name="totals" type="decimal"/>
+ 
+<div>
+<p> Calculator Example:</p>
+<lightning:layout>
+    <lightning:layoutitem>
+        <lightning:input type="number" label="FirstNumber" aura:id="demo"  value="{!v.fnumber}"/>
+        <lightning:input type="number" label="SecondNumber" aura:id="demo1"  value="{!v.snumber}"/>
+        <lightning:input type="number" label="Totals" aura:id="demo2"  value="{!v.totals}"/>
+          <!-- Brand variant: Identifies the primary action in a group of buttons -->
+    <lightning:button class="slds-button slds-button_outline-brand" label="Calculate the Sum"  onclick="{! c.handleClick }" />
+    <button class="slds-button slds-button_neutral">Neutral Button</button>
+    </lightning:layoutitem> 
+    </lightning:layout>
+</div>
+</aura:component>

@@ -1,0 +1,77 @@
+<template>
+  <lightning-card title="Simple intrest calculator">
+    <lightning-layout multiple-rows>
+      <lightning-layout-item
+        size="12"
+        padding="around-medium"
+        small-device-size="3"
+        medium-device-size="6"
+        large-device-size="3"
+      >
+        <lightning-input
+          type="number"
+          variant="standard"
+          name="name"
+          label="Enter principle"
+          onchange={principleChangeHandler}
+        ></lightning-input>
+      </lightning-layout-item>
+      <lightning-layout-item
+        size="12"
+        padding="around-medium"
+        small-device-size="3"
+        medium-device-size="6"
+        large-device-size="3"
+      >
+        <lightning-input
+          type="number"
+          variant="standard"
+          name="name"
+          label="Enter time"
+          onchange={timeChangeHandler}
+        ></lightning-input>
+      </lightning-layout-item>
+      <lightning-layout-item
+        size="12"
+        padding="around-medium"
+        small-device-size="3"
+        medium-device-size="6"
+        large-device-size="3"
+      >
+        <lightning-input
+          type="number"
+          variant="standard"
+          name="name"
+          label="Enter Rate of interest"
+          onchange={inetrestChangeHandler}
+        ></lightning-input>
+      </lightning-layout-item>
+      <lightning-layout-item
+        size="12"
+        padding="around-medium"
+        small-device-size="3"
+        medium-device-size="6"
+        large-device-size="3"
+      >
+        <lightning-button
+          variant="base"
+          label="CalculateInterest"
+          title="titleName"
+          icon-position="center"
+          onclick={calculateInterest}
+        ></lightning-button>
+      </lightning-layout-item>
+      <lightning-layout-item
+        size="12"
+        padding="around-medium"
+        small-device-size="3"
+        medium-device-size="6"
+        large-device-size="3"
+      >
+        <lightning-formatted-text
+          value={currentOutput}
+        ></lightning-formatted-text>
+      </lightning-layout-item>
+    </lightning-layout>
+  </lightning-card>
+</template>

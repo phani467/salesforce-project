@@ -1,0 +1,32 @@
+<template>
+
+    <p class='slds-text-heading_medium'>{activeSectionMessage}</p>
+    <lightning-button variant="brand" label="Open Section C" onclick={handleSetActiveSectionC}></lightning-button>
+    <!-- variant in (Base, Neutral, Brand, Brand Outline, Destructive, Destructive Text, Success)-->
+    <lightning-accordion class="example-accordion"
+           onsectiontoggle={handleToggleSection}
+           active-section-name="B">
+           <lightning-accordion-section name="A" label="Accordion Title for Section One">
+            <lightning-button-menu    alternative-text="Show menu">
+                <lightning-menu-item value="MenuItemOne" label="Menu Item One"></lightning-menu-item>
+                <lightning-menu-item value="MenuItemTwo" label="Menu Item Two"></lightning-menu-item>
+                <lightning-menu-item value="MenuItemThree" label="Menu Item Three"></lightning-menu-item>
+                <lightning-menu-item value="MenuItemFour" label="Menu Item Four"></lightning-menu-item>
+            </lightning-button-menu>   
+            
+            <p>This is the content area for Section One.</p>
+               <p>.</p>
+               <p>.</p>
+           </lightning-accordion-section>
+           <lightning-accordion-section name="B" label="Accordion Title for Section Two">
+               <p>This is the content area for Section Two.</p>
+               <p>.</p>
+               <p>.</p>
+           </lightning-accordion-section>
+           <lightning-accordion-section name="C" label="Accordion Title for Section Two">
+            <p>This is the content area for Section Two.</p>
+            <p>.</p>
+            <p>.</p>
+        </lightning-accordion-section>
+    </lightning-accordion>
+</template>

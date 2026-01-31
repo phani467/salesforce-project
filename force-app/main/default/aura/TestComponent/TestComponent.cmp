@@ -1,0 +1,49 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" controller="Calculator" >
+<aura:attribute name="fnumber" type="decimal"/>
+<aura:attribute name="snumber" type="decimal"/>
+<aura:attribute name="totals" type="decimal"/>
+    
+    
+    <article class="slds-card">
+<div class="slds-card__header slds-grid">
+<header class="slds-media slds-media_center slds-has-flexi-truncate">
+<div class="slds-media__figure">
+<span class="slds-icon_container slds-icon-standard-account" title="account">
+<lightning:icon iconName="standard:Account" alternativeText="alternativeText" />
+<span class="slds-assistive-text">account</span>
+</span>
+</div>
+<div class="slds-media__body">
+<h2 class="slds-card__header-title">
+<a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="Accounts">
+<span>Calculator</span>
+
+</a>
+</h2>
+</div>
+<div class="slds-no-flex">
+<button class="slds-button slds-button_neutral">New</button>
+</div>
+</header>
+</div>
+<div class="slds-card__body slds-card__body_inner">
+    <h1> Welcome to Salesforce Technology </h1>
+    <lightning:layout>
+    <lightning:layoutitem>
+        <lightning:input type="number" label="FirstNumber" aura:id="fNumber"  value="{!v.fnumber}"/>
+        <lightning:input type="number" label="SecondNumber" aura:id="Snumber"  value="{!v.snumber}"/>
+        <lightning:input type="number" label="Totals" aura:id="result"  value="{!v.totals}"/>
+          <!-- Brand variant: Identifies the primary action in a group of buttons -->
+    <lightning:button class="slds-button slds-button_outline-brand" label="Calculate the Sum"  onclick="{! c.handleClick }" />
+    <button class="slds-button slds-button_neutral">Neutral Button</button>
+    </lightning:layoutitem> 
+    </lightning:layout>
+
+</div>
+<footer class="slds-card__footer">
+<a class="slds-card__footer-action" href="javascript:void(0);">View All
+<span class="slds-assistive-text">Accounts</span>
+</a>
+</footer>
+</article>
+</aura:component>

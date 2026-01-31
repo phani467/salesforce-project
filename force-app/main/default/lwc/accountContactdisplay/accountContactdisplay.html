@@ -1,0 +1,20 @@
+<template>
+    <lightning-card variant="Narrow" title="Accounts with Contacts using wrapper class in LWC"
+        icon-name="custom:custom2">
+        <div class=slds-m-around_medium>
+            <template if:true={accountWithConatct} for:each={accountWithConatct} for:item="accCon">
+
+                <lightning-badge label={accCon.accRecord.Name} icon-name="standard:account"  key={accCon.accRecord.Id}></lightning-badge>
+                
+            </template>
+
+
+
+        </div>
+        
+    </lightning-card>
+
+
+
+
+</template>

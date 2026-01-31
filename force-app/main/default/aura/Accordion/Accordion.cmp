@@ -1,0 +1,52 @@
+<!-- Lightning Component Accordion -->
+
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" >
+    <lightning:button onclick="{!c.handleShowActiveScectionName}" label="Show Active Section Name"/>
+    <lightning:button onclick="{!c.handleActiceSectionC}" label="Open Section C"/>
+    
+    <lightning:accordion aura:id="accordion" activeSectionName="B" allowMultipleSectionsOpen="false">
+        <lightning:accordionSection name="A" label="Accordion Title A">
+
+            <aura:set attribute="actions">
+
+            <lightning:buttonMenu aura:id="menu"  alternativeText="Show menu">
+                <lightning:menuItem value="New" label="Menu Item One" />
+                <lightning:menuItem value="Edit" label="Menu Item Two" />
+            </lightning:buttonMenu>
+            </aura:set>
+        <aura:set attribute="body" > 
+        <p>This is the Content area from section A.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>This section height expands to fit your content.</p>
+        </aura:set>
+    </lightning:accordionSection>
+    <lightning:accordionSection name="B" label="Accordion Title B">
+
+        <p>This is the content area for section B</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>This section height expands to fit your content.</p>
+    </lightning:accordionSection>
+    <lightning:accordionSection name="C" label="Accordion Title C">
+        <p>This is the content area for section c</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>.</p>
+        <p>This section height expands to fit your content.</p>
+
+        
+    </lightning:accordionSection>
+    </lightning:accordion>
+
+    
+    
+</aura:component>

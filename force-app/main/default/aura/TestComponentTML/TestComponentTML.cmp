@@ -1,0 +1,15 @@
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" access="global" >
+	Hello World
+    <p class="paragraph">Helo World from Paragraph</p>
+    <div>
+    <p class="paragraph1">Helo World from Paragraph1</p>
+    </div>
+    <div>
+    <p class="paragraph2">Helo World from Paragraph2</p>
+    </div>
+    
+        
+     <p><lightning:formattedText value="Hello World using lightning component" /></p>
+    <lightning:button variant="destructive" label="Destructive" title ="Destructive action" onclick="{! c.handleClick}"/> 
+
+</aura:component>

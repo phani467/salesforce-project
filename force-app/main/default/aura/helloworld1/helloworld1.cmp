@@ -1,0 +1,4 @@
+<aura:component>
+    <P>Hello Lightning I am from helloworld 1</P>
+
+</aura:component>

@@ -1,0 +1,17 @@
+<aura:component>
+	
+    
+    <p class="p1"> This is lightning header component </p>
+    
+    <div>
+    
+        <p> This is the child component for Header cmp </p>
+        <div>
+        <p class="p2"> This is nested component </p>
+        </div>
+    </div>
+    <p>
+    <lightning:formattedText value="Hello world lightning componnt"/>
+        </p>
+        
+</aura:component>

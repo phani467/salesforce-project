@@ -1,0 +1,27 @@
+# Copado Conflict Resolution - Files to exclude from automerge
+
+# Profiles (often cause conflicts)
+**/profiles/*.profile-meta.xml
+
+# Permission Sets (manual review recommended)
+**/permissionsets/*.permissionset-meta.xml
+
+# System Administrator metadata
+**/profiles/Admin.profile-meta.xml
+**/profiles/System Administrator.profile-meta.xml
+
+# Package.xml (always review manually)
+manifest/package.xml
+
+# Org-specific settings
+**/settings/*.settings-meta.xml
+
+# Large static resources (binary conflicts)
+**/staticresources/*.resource
+
+# Custom Metadata with environment-specific values
+# **/customMetadata/*.md-meta.xml
+
+# Translations (if managed separately)
+# **/objectTranslations/*.objectTranslation-meta.xml
+# **/translations/*.translation-meta.xml

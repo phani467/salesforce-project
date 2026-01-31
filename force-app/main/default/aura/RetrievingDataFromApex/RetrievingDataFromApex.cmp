@@ -1,0 +1,8 @@
+<aura:component implements="flexipage:availableForAllPageTypes" access="global" controller="AttributeTypes">
+    <aura:attribute name="favoritecolors" type="String[]" default="cyan,yellow,magent"/>
+    <aura:iteration items="{!v.favoritecolors}" var="s">
+        {!s}
+    </aura:iteration>
+<lightning:button variant="base" label="Update" title="title" onclick="{! c.getString }"/>
+
+</aura:component>

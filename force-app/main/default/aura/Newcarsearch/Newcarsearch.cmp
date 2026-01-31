@@ -1,0 +1,14 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+<div>
+<p> Calculator Example:</p>
+<lightning:layout>
+    <lightning:layoutitem>
+        <lightning:input type="text" label="First Number" id="demo" />
+        <lightning:input type="text" label="Second Number" id="demo1" />
+        <lightning:input type="text" label="Totals" id="demo" />
+          <!-- Brand variant: Identifies the primary action in a group of buttons -->
+    <lightning:button variant="brand" label="Calculate the Sum"  onclick="{! c.handleClick }" />
+    </lightning:layoutitem> 
+    </lightning:layout>
+</div>
+</aura:component>

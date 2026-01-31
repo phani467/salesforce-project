@@ -1,0 +1,46 @@
+# Salesforce DX Ignore - Files to exclude from source tracking and deployments
+
+# LWC configuration files
+**/*.css.map
+**/*.js.map
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# SFDX directories
+.sfdx/
+.sf/
+.localdevserver/
+
+# Test results
+coverage/
+test-results/
+
+# Build outputs
+dist/
+build/
+
+# Metadata to skip (often causes issues)
+**/.eslintrc.json
+
+# Profiles (deploy only what's needed)
+# force-app/main/default/profiles/**
+
+# Standard objects fields (if not customizing)
+# force-app/main/default/objects/Account/fields/**
+
+# Managed package content
+# force-app/main/default/installedPackages/**
