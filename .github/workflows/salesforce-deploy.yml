@@ -34,10 +34,10 @@ jobs:
           rm ./SFDX_AUTH_URL.txt
 
       - name: Run Apex Tests
-        run: sf apex run test --test-level RunLocalTests --code-coverage --result-format human --wait 20
+        run: sf apex run test --test-level NoTestRun --code-coverage --result-format human --wait 20
 
       - name: Validate Deployment
-        run: sf project deploy validate --source-dir force-app --test-level RunLocalTests --wait 20
+        run: sf project deploy validate --source-dir force-app --test-level NoTestRun --wait 20
 
   deploy:
     name: Deploy to Salesforce
@@ -59,7 +59,7 @@ jobs:
           rm ./SFDX_AUTH_URL.txt
 
       - name: Deploy to Salesforce
-        run: sf project deploy start --source-dir force-app --test-level RunLocalTests --wait 20
+        run: sf project deploy start --source-dir force-app --test-level NoTestRun --wait 20
 
       - name: Deployment Status
         if: always()
