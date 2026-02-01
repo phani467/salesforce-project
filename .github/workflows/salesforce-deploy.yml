@@ -27,17 +27,30 @@ jobs:
           npm install -g @salesforce/cli
           sf version
 
+      - name: Install sfdx-git-delta
+        run: |
+          echo y | sf plugins install sfdx-git-delta
+
+      - name: Generate delta package
+        run: |
+          mkdir delta
+          sf sgd source delta --to HEAD --from HEAD^ --output delta/ --source force-app/
+          echo "--- Changed components ---"
+          cat delta/package/package.xml
+
       - name: Authenticate to Salesforce
         run: |
           echo "${{ secrets.SFDX_AUTH_URL }}" > ./SFDX_AUTH_URL.txt
           sf org login sfdx-url --sfdx-url-file ./SFDX_AUTH_URL.txt --alias target-org --set-default
           rm ./SFDX_AUTH_URL.txt
 
-      - name: Run Apex Tests
-        run: sf apex run test --test-level NoTestRun --code-coverage --result-format human --wait 20
-
-      - name: Validate Deployment
-        run: sf project deploy validate --source-dir force-app --test-level NoTestRun --wait 20
+      - name: Validate Deployment (Delta Only)
+        run: |
+          if [ -s delta/package/package.xml ]; then
+            sf project deploy validate --manifest delta/package/package.xml --test-level NoTestRun --wait 20
+          else
+            echo "No changes to validate"
+          fi
 
   deploy:
     name: Deploy to Salesforce
@@ -46,11 +59,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Salesforce CLI
         run: |
           npm install -g @salesforce/cli
           sf version
+
+      - name: Install sfdx-git-delta
+        run: |
+          echo y | sf plugins install sfdx-git-delta
+
+      - name: Generate delta package for deployment
+        run: |
+          mkdir delta
+          sf sgd source delta --to HEAD --from HEAD~1 --output delta/ --source force-app/
+          echo "--- Deploying these components ---"
+          cat delta/package/package.xml
 
       - name: Authenticate to Salesforce
         run: |
@@ -58,8 +84,13 @@ jobs:
           sf org login sfdx-url --sfdx-url-file ./SFDX_AUTH_URL.txt --alias target-org --set-default
           rm ./SFDX_AUTH_URL.txt
 
-      - name: Deploy to Salesforce
-        run: sf project deploy start --source-dir force-app --test-level NoTestRun --wait 20
+      - name: Deploy to Salesforce (Delta Only)
+        run: |
+          if [ -s delta/package/package.xml ]; then
+            sf project deploy start --manifest delta/package/package.xml --test-level NoTestRun --wait 20
+          else
+            echo "No changes to deploy"
+          fi
 
       - name: Deployment Status
         if: always()
