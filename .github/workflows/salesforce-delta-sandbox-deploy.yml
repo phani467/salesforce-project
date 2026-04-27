@@ -69,7 +69,7 @@ jobs:
       - name: Install sfdx-git-delta
         run: |
           echo y | sf plugins install sfdx-git-delta
-          sf sgd --version
+          sf plugins | grep sfdx-git-delta
 
       # ------------------------------------------------------------------ #
       # 5. Generate the delta package.xml                                  #
