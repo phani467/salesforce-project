@@ -1,0 +1,191 @@
+name: Salesforce Delta Deploy to Developer Sandbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: "Source Branch (contains the NEW changes)"
+        required: true
+        default: "develop"
+      destination_branch:
+        description: "Destination Branch (baseline to compare AGAINST)"
+        required: true
+        default: "main"
+      test_level:
+        description: "Test Level"
+        required: true
+        default: "NoTestRun"
+        type: choice
+        options:
+          - NoTestRun
+          - RunLocalTests
+          - RunAllTestsInOrg
+      dry_run:
+        description: "Dry Run (validate only, no actual deployment)"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  delta-deploy-sandbox:
+    name: Delta Deploy to Developer Sandbox
+    runs-on: ubuntu-latest
+
+    steps:
+      # ------------------------------------------------------------------ #
+      # 1. Checkout – full history required for sfdx-git-delta diff         #
+      # ------------------------------------------------------------------ #
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ------------------------------------------------------------------ #
+      # 2. Fetch both branches so the delta tool can compare them           #
+      # ------------------------------------------------------------------ #
+      - name: Fetch source and destination branches
+        run: |
+          git fetch origin ${{ github.event.inputs.source_branch }}
+          git fetch origin ${{ github.event.inputs.destination_branch }}
+          echo "Source      : ${{ github.event.inputs.source_branch }}"
+          echo "Destination : ${{ github.event.inputs.destination_branch }}"
+          echo "Test Level  : ${{ github.event.inputs.test_level }}"
+          echo "Dry Run     : ${{ github.event.inputs.dry_run }}"
+
+      # ------------------------------------------------------------------ #
+      # 3. Install Salesforce CLI                                           #
+      # ------------------------------------------------------------------ #
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+          sf version
+
+      # ------------------------------------------------------------------ #
+      # 4. Install sfdx-git-delta plugin                                   #
+      # ------------------------------------------------------------------ #
+      - name: Install sfdx-git-delta
+        run: |
+          echo y | sf plugins install sfdx-git-delta
+          sf sgd --version
+
+      # ------------------------------------------------------------------ #
+      # 5. Generate the delta package.xml                                  #
+      #    --from  = destination branch (baseline)                         #
+      #    --to    = source branch      (new changes)                      #
+      # ------------------------------------------------------------------ #
+      - name: Generate delta package between branches
+        run: |
+          mkdir -p delta
+          sf sgd source delta \
+            --from "origin/${{ github.event.inputs.destination_branch }}" \
+            --to   "origin/${{ github.event.inputs.source_branch }}" \
+            --output delta/ \
+            --source force-app/ \
+            --generate-delta
+          echo ""
+          echo "========== package.xml (components to deploy) =========="
+          cat delta/package/package.xml
+          echo ""
+          if [ -f delta/destructiveChanges/destructiveChanges.xml ]; then
+            echo "===== destructiveChanges.xml (components to delete) ====="
+            cat delta/destructiveChanges/destructiveChanges.xml
+          fi
+
+      # ------------------------------------------------------------------ #
+      # 6. Abort early if there is nothing to deploy                       #
+      # ------------------------------------------------------------------ #
+      - name: Check for delta changes
+        id: check_delta
+        run: |
+          # package.xml always exists but only has real members when non-empty
+          MEMBER_COUNT=$(grep -c "<members>" delta/package/package.xml || true)
+          echo "Component count: $MEMBER_COUNT"
+          if [ "$MEMBER_COUNT" -eq 0 ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️  No delta changes found between branches. Skipping deployment."
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "✅ $MEMBER_COUNT component(s) will be deployed."
+          fi
+
+      # ------------------------------------------------------------------ #
+      # 7. Authenticate to the Developer Sandbox                           #
+      # ------------------------------------------------------------------ #
+      - name: Authenticate to Developer Sandbox
+        if: steps.check_delta.outputs.has_changes == 'true'
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL_SANDBOX }}" > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url \
+            --sfdx-url-file ./SFDX_AUTH_URL.txt \
+            --alias developer-sandbox \
+            --set-default
+          rm ./SFDX_AUTH_URL.txt
+          sf org display
+
+      # ------------------------------------------------------------------ #
+      # 8a. DRY RUN – validate only, nothing is committed to the org       #
+      # ------------------------------------------------------------------ #
+      - name: "[DRY RUN] Validate delta package against sandbox"
+        if: >
+          steps.check_delta.outputs.has_changes == 'true' &&
+          github.event.inputs.dry_run == 'true'
+        run: |
+          echo "🔍 Running in DRY RUN (validate-only) mode..."
+          sf project deploy validate \
+            --manifest delta/package/package.xml \
+            --target-org developer-sandbox \
+            --test-level ${{ github.event.inputs.test_level }} \
+            --wait 30
+          echo "✅ Validation passed. No changes were deployed."
+
+      # ------------------------------------------------------------------ #
+      # 8b. REAL DEPLOY – deploy delta package to the sandbox              #
+      # ------------------------------------------------------------------ #
+      - name: Deploy delta package to Developer Sandbox
+        if: >
+          steps.check_delta.outputs.has_changes == 'true' &&
+          github.event.inputs.dry_run == 'false'
+        run: |
+          echo "🚀 Deploying delta components to Developer Sandbox..."
+          sf project deploy start \
+            --manifest delta/package/package.xml \
+            --target-org developer-sandbox \
+            --test-level ${{ github.event.inputs.test_level }} \
+            --wait 30
+          echo "✅ Deployment complete."
+
+      # ------------------------------------------------------------------ #
+      # 9. Apply destructive changes if any components were deleted        #
+      # ------------------------------------------------------------------ #
+      - name: Apply destructive changes (deletions)
+        if: >
+          steps.check_delta.outputs.has_changes == 'true' &&
+          github.event.inputs.dry_run == 'false' &&
+          hashFiles('delta/destructiveChanges/destructiveChanges.xml') != ''
+        run: |
+          echo "🗑️  Applying destructive changes (deleted components)..."
+          sf project deploy start \
+            --manifest delta/destructiveChanges/destructiveChanges.xml \
+            --target-org developer-sandbox \
+            --test-level NoTestRun \
+            --wait 30
+          echo "✅ Destructive changes applied."
+
+      # ------------------------------------------------------------------ #
+      # 10. Summary                                                         #
+      # ------------------------------------------------------------------ #
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "=================================================="
+          echo "  Salesforce Delta Deployment Summary"
+          echo "=================================================="
+          echo "  Source Branch      : ${{ github.event.inputs.source_branch }}"
+          echo "  Destination Branch : ${{ github.event.inputs.destination_branch }}"
+          echo "  Test Level         : ${{ github.event.inputs.test_level }}"
+          echo "  Dry Run            : ${{ github.event.inputs.dry_run }}"
+          echo "  Job Status         : ${{ job.status }}"
+          echo "=================================================="
