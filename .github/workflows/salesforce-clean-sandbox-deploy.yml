@@ -1,0 +1,126 @@
+name: Salesforce Clean Deploy to Developer Sandbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: "Branch to deploy from"
+        required: true
+        default: "main"
+      test_level:
+        description: "Test Level"
+        required: true
+        default: "NoTestRun"
+        type: choice
+        options:
+          - NoTestRun
+          - RunLocalTests
+          - RunAllTestsInOrg
+      dry_run:
+        description: "Dry Run (validate only, no actual deployment)"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  clean-deploy-sandbox:
+    name: Clean Deploy to Developer Sandbox
+    runs-on: ubuntu-latest
+
+    steps:
+      # ------------------------------------------------------------------ #
+      # 1. Checkout the selected branch                                     #
+      # ------------------------------------------------------------------ #
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.source_branch }}
+          fetch-depth: 1
+
+      # ------------------------------------------------------------------ #
+      # 2. Print deployment parameters                                      #
+      # ------------------------------------------------------------------ #
+      - name: Print deployment parameters
+        run: |
+          echo "Source Branch : ${{ github.event.inputs.source_branch }}"
+          echo "Test Level    : ${{ github.event.inputs.test_level }}"
+          echo "Dry Run       : ${{ github.event.inputs.dry_run }}"
+
+      # ------------------------------------------------------------------ #
+      # 3. Install Salesforce CLI                                           #
+      # ------------------------------------------------------------------ #
+      - name: Install Salesforce CLI
+        run: |
+          npm install -g @salesforce/cli
+          sf version
+
+      # ------------------------------------------------------------------ #
+      # 4. Verify force-app directory exists                                #
+      # ------------------------------------------------------------------ #
+      - name: Verify source directory
+        run: |
+          if [ ! -d "force-app" ]; then
+            echo "❌ force-app directory not found. Aborting."
+            exit 1
+          fi
+          echo "✅ force-app directory found."
+          find force-app -type f | wc -l | xargs -I{} echo "Total source files: {}"
+
+      # ------------------------------------------------------------------ #
+      # 5. Authenticate to the Developer Sandbox                           #
+      # ------------------------------------------------------------------ #
+      - name: Authenticate to Developer Sandbox
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL_SANDBOX }}" > ./SFDX_AUTH_URL.txt
+          sf org login sfdx-url \
+            --sfdx-url-file ./SFDX_AUTH_URL.txt \
+            --alias developer-sandbox \
+            --set-default
+          rm ./SFDX_AUTH_URL.txt
+          sf org display
+
+      # ------------------------------------------------------------------ #
+      # 6a. DRY RUN – validate only, nothing is committed to the org       #
+      # ------------------------------------------------------------------ #
+      - name: "[DRY RUN] Validate full deployment against sandbox"
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "🔍 Running in DRY RUN (validate-only) mode..."
+          sf project deploy validate \
+            --source-dir force-app \
+            --target-org developer-sandbox \
+            --test-level ${{ github.event.inputs.test_level }} \
+            --wait 60
+          echo "✅ Validation passed. No changes were deployed."
+
+      # ------------------------------------------------------------------ #
+      # 6b. REAL DEPLOY – full clean deploy from selected branch           #
+      # ------------------------------------------------------------------ #
+      - name: Deploy all components to Developer Sandbox
+        if: github.event.inputs.dry_run == 'false'
+        run: |
+          echo "🚀 Starting clean deployment from branch: ${{ github.event.inputs.source_branch }}..."
+          sf project deploy start \
+            --source-dir force-app \
+            --target-org developer-sandbox \
+            --test-level ${{ github.event.inputs.test_level }} \
+            --wait 60
+          echo "✅ Deployment complete."
+
+      # ------------------------------------------------------------------ #
+      # 7. Summary                                                          #
+      # ------------------------------------------------------------------ #
+      - name: Deployment Summary
+        if: always()
+        run: |
+          echo "=================================================="
+          echo "  Salesforce Clean Deployment Summary"
+          echo "=================================================="
+          echo "  Source Branch : ${{ github.event.inputs.source_branch }}"
+          echo "  Test Level    : ${{ github.event.inputs.test_level }}"
+          echo "  Dry Run       : ${{ github.event.inputs.dry_run }}"
+          echo "  Job Status    : ${{ job.status }}"
+          echo "=================================================="
